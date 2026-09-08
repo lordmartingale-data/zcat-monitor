@@ -60,6 +60,16 @@
    ],
    "quote": "STONK",
    "url": "https://dexscreener.com/solana/j6nhiirmzrds6xrh6uwxhinyekyt5zmfkjhxa4gc4vaj"
+  },
+  "z29j7kXfR66dj2d3FT4yxiQHg7EULzjsoh2Hc2DgNak": {
+   "base": "ZCAT",
+   "dex": "meteora",
+   "firstSeen": "2026-09-08T23:00:00Z",
+   "labels": [
+    "DLMM"
+   ],
+   "quote": "ZEC",
+   "url": "https://dexscreener.com/solana/z29j7kxfr66dj2d3ft4yxiqhg7eulzjsoh2hc2dgnak"
   }
  },
  "snapshots": [
@@ -103,8 +113,55 @@
     }
    },
    "t": "2026-09-08T21:00:00Z"
+  },
+  {
+   "pools": {
+    "7t477j7S8SDcdg1pzCSvjRjYK3nPc14FmrbzPYTjfHYs": {
+     "liq": 1379037.3,
+     "px": 0.1235,
+     "v1": 333863.81,
+     "v24": 3512433.69
+    },
+    "BTccxxTFi7a9xJTE1exKn38Jgie35s6gNeRxd8DM61Rc": {
+     "liq": 1767332.41,
+     "px": 0.1274,
+     "v1": 134322314.67,
+     "v24": 153778375.69
+    },
+    "CZt61djgJ6ggjA1aCfYskFViBQxcprA9HT3nE7PZdE1X": {
+     "liq": 105975.91,
+     "px": 0.1282,
+     "v1": 138970.98,
+     "v24": 1907746.09
+    },
+    "GVJ3uPdWMQto2NeC3KPcxGGZAUDGgxTWYQ519b7YKAyy": {
+     "liq": 226431.4,
+     "px": 0.1249,
+     "v1": 110855.34,
+     "v24": 1273409.62
+    },
+    "GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8": {
+     "liq": 561331.57,
+     "px": 0.124,
+     "v1": 185574.7,
+     "v24": 3881910.74
+    },
+    "J6nHiirmZrDS6XRH6uWXHiNYeKyT5zMfkjHXa4GC4vAj": {
+     "liq": 55553.62,
+     "px": 0.1262,
+     "v1": 3330923.91,
+     "v24": 4850370.16
+    },
+    "z29j7kXfR66dj2d3FT4yxiQHg7EULzjsoh2Hc2DgNak": {
+     "liq": 5913.6,
+     "px": 0.1249,
+     "v1": 2653155.29,
+     "v24": 3291010.58
+    }
+   },
+   "t": "2026-09-08T23:00:00Z"
   }
  ],
  "threshold": 900000,
- "updated": "2026-09-08T21:00:00Z"
+ "updated": "2026-09-08T23:00:00Z"
 }
