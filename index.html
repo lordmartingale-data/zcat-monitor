@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZCAT pool volume</title>
+<style>
+  :root {
+    --ground: #17131f;
+    --panel: #201a2b;
+    --panel-edge: #2f2740;
+    --ink: #ece6f6;
+    --muted: #9b8fb4;
+    --faint: #6b6082;
+    --up: #5ed3a0;
+    --down: #ef7b8e;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: ui-sans-serif, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 20px 72px;
+  }
+
+  header { margin-bottom: 32px; }
+
+  h1 {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+
+  .sub { color: var(--muted); font-size: 14px; margin: 0; }
+  .sub b { color: var(--ink); font-weight: 600; }
+
+  /* Hero: where the last hour of volume actually went. */
+  .flow { margin-bottom: 10px; }
+
+  .flow-bar {
+    display: flex;
+    height: 76px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+
+  .flow-seg {
+    position: relative;
+    min-width: 3px;
+    transition: filter .15s;
+  }
+  .flow-seg:hover { filter: brightness(1.25); }
+
+  .flow-seg span {
+    position: absolute;
+    left: 9px;
+    bottom: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #17131f;
+    white-space: nowrap;
+  }
+
+  .flow-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .flow-legend i {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 2px;
+    margin-right: 7px;
+    vertical-align: 1px;
+  }
+
+  h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 40px 0 14px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--faint);
+    padding: 0 0 9px;
+    border-bottom: 1px solid var(--panel-edge);
+  }
+  th:first-child { text-align: left; }
+
+  td {
+    padding: 13px 0;
+    border-bottom: 1px solid var(--panel-edge);
+    text-align: right;
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; white-space: normal; }
+
+  tbody tr:hover { background: rgba(255,255,255,.025); }
+
+  .pool { display: flex; align-items: baseline; gap: 9px; }
+  .swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; align-self: center; }
+  .pair { font-weight: 600; }
+  .pair a { color: inherit; text-decoration: none; }
+  .pair a:hover { text-decoration: underline; }
+  .venue { color: var(--muted); font-size: 13px; }
+
+  .spark { width: 108px; height: 26px; vertical-align: middle; }
+  .delta-up { color: var(--up); }
+  .delta-down { color: var(--down); }
+  .dim { color: var(--faint); }
+
+  .chart { width: 100%; height: 300px; display: block; }
+  .axis { fill: var(--faint); font-size: 11px; }
+  .grid { stroke: var(--panel-edge); stroke-width: 1; }
+
+  .empty {
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 5px;
+    padding: 26px;
+    color: var(--muted);
+  }
+  .empty code {
+    color: var(--ink);
+    background: rgba(255,255,255,.06);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 18px;
+    border-top: 1px solid var(--panel-edge);
+    color: var(--faint);
+    font-size: 13px;
+  }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 620px) {
+    .hide-sm { display: none; }
+    .flow-bar { height: 60px; }
+    .flow-seg span { font-size: 11px; left: 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  a:focus-visible, .flow-seg:focus-visible {
+    outline: 2px solid #b39bff;
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>ZCAT pool volume</h1>
+    <p class="sub" id="strap">Loading…</p>
+  </header>
+
+  <div id="body"></div>
+
+  <footer>
+    Data from the DexScreener token API, collected hourly by GitHub Actions.
+    Pools enter the set when 24h volume first clears $900K and are tracked from then on.
+    <a href="https://dexscreener.com/solana/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR">View on DexScreener</a>
+  </footer>
+
+</div>
+
+<script>
+const PALETTE = ["#f2b441","#8b7cff","#4fc3a1","#ef7b8e","#5bb8e8","#d98cd0","#9ec96a","#f09359"];
+
+const usd = n =>
+  n >= 1e9 ? "$" + (n / 1e9).toFixed(2) + "B" :
+  n >= 1e6 ? "$" + (n / 1e6).toFixed(2) + "M" :
+  n >= 1e3 ? "$" + (n / 1e3).toFixed(0) + "K" :
+  "$" + n.toFixed(0);
+
+const pct = n => (n * 100).toFixed(1) + "%";
+
+function ago(iso) {
+  const mins = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (mins < 2) return "just now";
+  if (mins < 60) return mins + " min ago";
+  const hrs = Math.round(mins / 60);
+  return hrs + (hrs === 1 ? " hour ago" : " hours ago");
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// Several pools quote against the same token (three ZCAT/SOL pools, on
+// different venues), so a bare pair name is ambiguous. Append a short slice
+// of the pair address wherever a name would otherwise repeat.
+let NAMES = {};
+function namePools(pools, addrs) {
+  const counts = {};
+  addrs.forEach(a => {
+    const k = pools[a].quote;
+    counts[k] = (counts[k] || 0) + 1;
+  });
+  NAMES = {};
+  addrs.forEach(a => {
+    const base = `ZCAT/${pools[a].quote}`;
+    NAMES[a] = counts[pools[a].quote] > 1 ? `${base} ${a.slice(0, 4)}` : base;
+  });
+}
+
+function label(meta, addr) {
+  return NAMES[addr] || `ZCAT/${meta.quote}`;
+}
+
+function venue(meta) {
+  const kind = (meta.labels || []).join(" ");
+  const dex = meta.dex.charAt(0).toUpperCase() + meta.dex.slice(1);
+  return kind ? `${dex} ${kind}` : dex;
+}
+
+// Small inline sparkline of a pool's hourly volume.
+function sparkline(values, colour) {
+  if (values.length < 2) return "";
+  const max = Math.max(...values, 1);
+  const step = 106 / (values.length - 1);
+  const pts = values.map((v, i) => `${(i * step + 1).toFixed(1)},${(24 - (v / max) * 22).toFixed(1)}`);
+  return `<svg class="spark" viewBox="0 0 108 26" aria-hidden="true">
+    <polyline fill="none" stroke="${colour}" stroke-width="1.5"
+      stroke-linejoin="round" stroke-linecap="round" points="${pts.join(" ")}"/>
+  </svg>`;
+}
+
+// Multi-series line chart of hourly volume over time.
+function chart(snapshots, addrs, colours, metas) {
+  const W = 1040, H = 300, L = 58, R = 14, T = 16, B = 30;
+  const iw = W - L - R, ih = H - T - B;
+
+  const series = addrs.map(a => snapshots.map(s => (s.pools[a] || {}).v1 || 0));
+  const max = Math.max(1, ...series.flat());
+  const n = snapshots.length;
+  const x = i => L + (n === 1 ? iw / 2 : (i / (n - 1)) * iw);
+  const y = v => T + ih - (v / max) * ih;
+
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+    aria-label="Hourly volume per pool over time">`;
+
+  for (let g = 0; g <= 4; g++) {
+    const v = (max / 4) * g, yy = y(v);
+    svg += `<line class="grid" x1="${L}" y1="${yy}" x2="${W - R}" y2="${yy}"/>`;
+    svg += `<text class="axis" x="${L - 9}" y="${yy + 4}" text-anchor="end">${usd(v)}</text>`;
+  }
+
+  const ticks = Math.min(6, n);
+  for (let t = 0; t < ticks; t++) {
+    const i = Math.round((t / Math.max(1, ticks - 1)) * (n - 1));
+    const d = new Date(snapshots[i].t);
+    const lab = d.toUTCString().slice(5, 11) + " " + String(d.getUTCHours()).padStart(2, "0") + "h";
+    svg += `<text class="axis" x="${x(i)}" y="${H - 9}" text-anchor="middle">${lab}</text>`;
+  }
+
+  series.forEach((vals, k) => {
+    const pts = vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    svg += `<polyline fill="none" stroke="${colours[k]}" stroke-width="2"
+      stroke-linejoin="round" stroke-linecap="round" points="${pts}">
+      <title>${esc(label(metas[k], addrs[k]))}</title></polyline>`;
+  });
+
+  return svg + "</svg>";
+}
+
+function render(h) {
+  const strap = document.getElementById("strap");
+  const body = document.getElementById("body");
+  const snaps = h.snapshots || [];
+
+  if (!snaps.length) {
+    strap.textContent = "No snapshots yet.";
+    body.innerHTML = `<div class="empty">The collector hasn't run yet.
+      Open the Actions tab and run <code>Collect pool volume</code> once to seed the history,
+      or wait for the next hourly run.</div>`;
+    return;
+  }
+
+  const last = snaps[snaps.length - 1];
+  const prev = snaps.length > 1 ? snaps[snaps.length - 2] : null;
+
+  // Order pools by last-hour volume, biggest first.
+  const addrs = Object.keys(last.pools)
+    .sort((a, b) => (last.pools[b].v1 || 0) - (last.pools[a].v1 || 0));
+
+  namePools(h.pools, addrs);
+
+  const colours = {};
+  addrs.forEach((a, i) => colours[a] = PALETTE[i % PALETTE.length]);
+
+  const hourTotal = addrs.reduce((s, a) => s + (last.pools[a].v1 || 0), 0);
+  const dayTotal = addrs.reduce((s, a) => s + (last.pools[a].v24 || 0), 0);
+
+  strap.innerHTML = `<b>${usd(hourTotal)}</b> traded in the last hour across
+    ${addrs.length} pools · <b>${usd(dayTotal)}</b> over 24h ·
+    updated ${ago(last.t)}`;
+
+  // Hero: concentration of the last hour's flow.
+  let flow = `<div class="flow"><div class="flow-bar">`;
+  addrs.forEach(a => {
+    const share = hourTotal ? (last.pools[a].v1 || 0) / hourTotal : 0;
+    if (share <= 0) return;
+    flow += `<div class="flow-seg" style="width:${(share * 100).toFixed(2)}%;
+      background:${colours[a]}" title="${esc(label(h.pools[a], a))} — ${pct(share)}">
+      ${share > 0.09 ? `<span>${pct(share)}</span>` : ""}</div>`;
+  });
+  flow += `</div><div class="flow-legend">`;
+  addrs.forEach(a => {
+    flow += `<span><i style="background:${colours[a]}"></i>${esc(label(h.pools[a], a))}
+      <span class="dim">${esc(venue(h.pools[a]))}</span></span>`;
+  });
+  flow += `</div></div>`;
+
+  // Table.
+  let rows = "";
+  addrs.forEach(a => {
+    const meta = h.pools[a], now = last.pools[a];
+    const before = prev ? prev.pools[a] : null;
+    const v1 = now.v1 || 0;
+
+    let delta = `<span class="dim">—</span>`;
+    if (before && before.v1 > 0) {
+      const d = (v1 - before.v1) / before.v1;
+      delta = `<span class="${d >= 0 ? "delta-up" : "delta-down"}">
+        ${d >= 0 ? "+" : ""}${(d * 100).toFixed(0)}%</span>`;
+    }
+
+    const hist = snaps.slice(-48).map(s => (s.pools[a] || {}).v1 || 0);
+    const turnover = now.liq > 0 ? now.v24 / now.liq : 0;
+
+    rows += `<tr>
+      <td><div class="pool">
+        <span class="swatch" style="background:${colours[a]}"></span>
+        <span>
+          <span class="pair"><a href="${esc(meta.url)}" rel="noopener">${esc(label(meta, a))}</a></span>
+          <span class="venue">${esc(venue(meta))}</span>
+        </span>
+      </div></td>
+      <td>${usd(v1)}</td>
+      <td>${delta}</td>
+      <td>${usd(now.v24)}</td>
+      <td class="hide-sm">${usd(now.liq)}</td>
+      <td class="hide-sm">${turnover ? turnover.toFixed(1) + "×" : "—"}</td>
+      <td class="hide-sm">${sparkline(hist, colours[a])}</td>
+    </tr>`;
+  });
+
+  body.innerHTML = flow + `
+    <h2>Hourly volume by pool</h2>
+    ${chart(snaps.slice(-168), addrs, addrs.map(a => colours[a]), addrs.map(a => h.pools[a]))}
+    <h2>Pools</h2>
+    <table>
+      <thead><tr>
+        <th>Pool</th><th>1h vol</th><th>vs prev</th><th>24h vol</th>
+        <th class="hide-sm">Liquidity</th><th class="hide-sm">Turnover</th>
+        <th class="hide-sm">48h</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+fetch("data/history.json?t=" + Date.now())
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(render)
+  .catch(e => {
+    document.getElementById("strap").textContent = "Couldn't load the data file.";
+    document.getElementById("body").innerHTML =
+      `<div class="empty">Reading <code>data/history.json</code> failed (${esc(e.message)}).
+       If you've just enabled Pages, give it a minute and reload.</div>`;
+  });
+</script>
+</body>
+</html>
