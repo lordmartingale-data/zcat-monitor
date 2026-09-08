@@ -1,0 +1,41 @@
+name: Collect pool volume
+
+on:
+  schedule:
+    # Hourly, at 17 past. Off-the-hour times are less congested on GitHub's
+    # shared scheduler, so runs are less likely to be delayed or dropped.
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+# Prevent two runs writing history.json at once.
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch snapshot
+        run: python scripts/collect.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet data/history.json; then
+            echo "No change; nothing to commit."
+            exit 0
+          fi
+          git add data/history.json
+          git commit -m "data: snapshot $(date -u +'%Y-%m-%dT%H:00Z')"
+          git push
