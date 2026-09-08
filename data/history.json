@@ -1,7 +1,110 @@
 {
  "mint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
- "pools": {},
- "snapshots": [],
+ "pools": {
+  "7t477j7S8SDcdg1pzCSvjRjYK3nPc14FmrbzPYTjfHYs": {
+   "base": "ZCAT",
+   "dex": "meteora",
+   "firstSeen": "2026-09-08T21:00:00Z",
+   "labels": [
+    "DLMM"
+   ],
+   "quote": "SOL",
+   "url": "https://dexscreener.com/solana/7t477j7s8sdcdg1pzcsvjrjyk3npc14fmrbzpytjfhys"
+  },
+  "BTccxxTFi7a9xJTE1exKn38Jgie35s6gNeRxd8DM61Rc": {
+   "base": "ZCAT",
+   "dex": "raydium",
+   "firstSeen": "2026-09-08T21:00:00Z",
+   "labels": [
+    "CLMM"
+   ],
+   "quote": "ZEC",
+   "url": "https://dexscreener.com/solana/btccxxtfi7a9xjte1exkn38jgie35s6gnerxd8dm61rc"
+  },
+  "CZt61djgJ6ggjA1aCfYskFViBQxcprA9HT3nE7PZdE1X": {
+   "base": "ZCAT",
+   "dex": "raydium",
+   "firstSeen": "2026-09-08T21:00:00Z",
+   "labels": [
+    "CLMM"
+   ],
+   "quote": "USDC",
+   "url": "https://dexscreener.com/solana/czt61djgj6ggja1acfyskfvibqxcpra9ht3ne7pzde1x"
+  },
+  "GVJ3uPdWMQto2NeC3KPcxGGZAUDGgxTWYQ519b7YKAyy": {
+   "base": "ZCAT",
+   "dex": "orca",
+   "firstSeen": "2026-09-08T21:00:00Z",
+   "labels": [
+    "wp"
+   ],
+   "quote": "SOL",
+   "url": "https://dexscreener.com/solana/gvj3updwmqto2nec3kpcxggzaudggxtwyq519b7ykayy"
+  },
+  "GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8": {
+   "base": "ZCAT",
+   "dex": "meteora",
+   "firstSeen": "2026-09-08T21:00:00Z",
+   "labels": [
+    "DLMM"
+   ],
+   "quote": "SOL",
+   "url": "https://dexscreener.com/solana/gupbekwp9mqb23cghhimqztaigpdujooovo1necerhm8"
+  },
+  "J6nHiirmZrDS6XRH6uWXHiNYeKyT5zMfkjHXa4GC4vAj": {
+   "base": "ZCAT",
+   "dex": "meteora",
+   "firstSeen": "2026-09-08T21:00:00Z",
+   "labels": [
+    "DLMM"
+   ],
+   "quote": "STONK",
+   "url": "https://dexscreener.com/solana/j6nhiirmzrds6xrh6uwxhinyekyt5zmfkjhxa4gc4vaj"
+  }
+ },
+ "snapshots": [
+  {
+   "pools": {
+    "7t477j7S8SDcdg1pzCSvjRjYK3nPc14FmrbzPYTjfHYs": {
+     "liq": 999265.08,
+     "px": 0.1004,
+     "v1": 117003.12,
+     "v24": 3372335.74
+    },
+    "BTccxxTFi7a9xJTE1exKn38Jgie35s6gNeRxd8DM61Rc": {
+     "liq": 1574447.31,
+     "px": 0.1012,
+     "v1": 414866.31,
+     "v24": 19922181.21
+    },
+    "CZt61djgJ6ggjA1aCfYskFViBQxcprA9HT3nE7PZdE1X": {
+     "liq": 93143.98,
+     "px": 0.1008,
+     "v1": 103602.61,
+     "v24": 1849233.03
+    },
+    "GVJ3uPdWMQto2NeC3KPcxGGZAUDGgxTWYQ519b7YKAyy": {
+     "liq": 207819.62,
+     "px": 0.0974,
+     "v1": 24348.92,
+     "v24": 1082382.95
+    },
+    "GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8": {
+     "liq": 533873.5,
+     "px": 0.09995,
+     "v1": 179227.99,
+     "v24": 3854789.95
+    },
+    "J6nHiirmZrDS6XRH6uWXHiNYeKyT5zMfkjHXa4GC4vAj": {
+     "liq": 47709.73,
+     "px": 0.09778,
+     "v1": 62119.98,
+     "v24": 1575314.79
+    }
+   },
+   "t": "2026-09-08T21:00:00Z"
+  }
+ ],
  "threshold": 900000,
- "updated": null
+ "updated": "2026-09-08T21:00:00Z"
 }
