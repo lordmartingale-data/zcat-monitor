@@ -82,6 +82,15 @@ def main():
         liquidity = num((pair.get("liquidity") or {}).get("usd"))
         price = num(pair.get("priceUsd"))
 
+        # DexScreener sometimes returns a corrupt h1 figure (observed on
+        # Meteora DLMM pools) that is larger than the pool's own 24h volume.
+        # The hour sits inside the day, so that is impossible by definition;
+        # drop the reading rather than let one bad point wreck the chart.
+        if vol_1h > vol_24h * 1.02 and vol_24h > 0:
+            print(f"  dropped implausible 1h reading for {addr}: "
+                  f"{vol_1h:,.0f} > 24h {vol_24h:,.0f}", file=sys.stderr)
+            vol_1h = -1.0
+
         known = pools.get(addr)
         qualifies = vol_24h >= VOLUME_THRESHOLD
 
@@ -98,7 +107,8 @@ def main():
             }
 
         reading[addr] = {
-            "v1": round(vol_1h, 2),
+            # -1 marks "no valid reading this hour" and is skipped by the page.
+            "v1": round(vol_1h, 2) if vol_1h >= 0 else -1,
             "v24": round(vol_24h, 2),
             "liq": round(liquidity, 2),
             "px": price,
