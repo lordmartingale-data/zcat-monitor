@@ -198,29 +198,40 @@ function venue(meta) {
   return kind ? dex + " " + kind : dex;
 }
 
-// A 1h figure larger than the pool's own 24h figure is impossible, so treat it
-// as a bad feed reading. Older snapshots predate the collector-side guard.
+// An hour sits inside its own day, so a 1h figure above the 24h figure can
+// only be a feed error. Genuine spikes — even very large ones — are kept.
 function valid(r) {
   if (!r || typeof r.v1 !== "number" || r.v1 < 0) return false;
-  if (r.v24 > 0 && r.v1 > r.v24 * 1.02) return false;
+  if (r.v24 > 0 && r.v1 > r.v24 * 1.05) return false;
   return true;
 }
 const vol = r => valid(r) ? r.v1 : 0;
 
-let STATE = { hours: 24, hidden: new Set(), data: null, addrs: [], colours: {} };
+let STATE = { hours: 24, log: false, hidden: new Set(), data: null, addrs: [], colours: {} };
 
 function draw() {
   const h = STATE.data, addrs = STATE.addrs, colours = STATE.colours;
   const all = h.snapshots;
-  const snaps = STATE.hours ? all.slice(-STATE.hours) : all;
+  // Select by elapsed time rather than by count: runs get dropped, so "last 24
+  // entries" and "last 24 hours" are very different windows.
+  const endMs = new Date(all[all.length - 1].t).getTime();
+  const snaps = STATE.hours
+    ? all.filter(s => endMs - new Date(s.t).getTime() < STATE.hours * 36e5)
+    : all;
   const shown = addrs.filter(a => !STATE.hidden.has(a));
 
   const W = 1040, H = 340, L = 62, R = 58, T = 18, B = 34;
   const iw = W - L - R, ih = H - T - B;
   const n = snaps.length;
-  const band = iw / Math.max(n, 1);
-  const bw = Math.max(1.5, band * 0.72);
-  const cx = i => L + band * (i + 0.5);
+  const HOUR = 36e5;
+  const ms = snaps.map(s => new Date(s.t).getTime());
+  // Bars sit at their real position in time, so a missed run leaves a visible
+  // gap instead of being closed up as if the series were continuous.
+  const t0 = ms[0], t1 = ms[n - 1] + HOUR;
+  const span = Math.max(HOUR, t1 - t0);
+  const xt = t => L + ((t - t0) / span) * iw;
+  const bw = Math.max(1.5, (iw * HOUR / span) * 0.82);
+  const cx = i => xt(ms[i]) + bw / 2;
 
   const totals = snaps.map(s => shown.reduce((sum, a) => sum + vol(s.pools[a]), 0));
   const vmax = Math.max(1, ...totals);
@@ -234,7 +245,11 @@ function draw() {
   const pad = (pmax - pmin) * 0.15 || pmax * 0.05 || 1;
   const plo = Math.max(0, pmin - pad), phi = pmax + pad;
 
-  const y = v => T + ih - (v / vmax) * ih;
+  const LOGMIN = 1000;
+  const lg = v => Math.log10(Math.max(v, LOGMIN));
+  const y = STATE.log
+    ? v => T + ih - ((lg(v) - lg(LOGMIN)) / (lg(vmax) - lg(LOGMIN) || 1)) * ih
+    : v => T + ih - (v / vmax) * ih;
   const yp = p => T + ih - ((p - plo) / (phi - plo)) * ih;
 
   let svg = '<svg class="chart" id="svg" viewBox="0 0 ' + W + ' ' + H + '"' +
@@ -242,7 +257,10 @@ function draw() {
     ' aria-label="Hourly volume per pool as stacked bars, with ZCAT price">';
 
   for (let g = 0; g <= 4; g++) {
-    const v = (vmax / 4) * g, yy = y(v);
+    const v = STATE.log
+      ? Math.pow(10, lg(LOGMIN) + ((lg(vmax) - lg(LOGMIN)) / 4) * g)
+      : (vmax / 4) * g;
+    const yy = y(v);
     svg += '<line class="grid" x1="' + L + '" y1="' + yy.toFixed(1) +
       '" x2="' + (W - R) + '" y2="' + yy.toFixed(1) + '"/>';
     svg += '<text class="axis" x="' + (L - 9) + '" y="' + (yy + 4).toFixed(1) +
@@ -263,7 +281,7 @@ function draw() {
       const v = vol(s.pools[a]);
       if (v <= 0) return;
       const y0 = y(base + v), y1 = y(base);
-      svg += '<rect x="' + (cx(i) - bw / 2).toFixed(1) + '" y="' + y0.toFixed(1) +
+      svg += '<rect x="' + xt(ms[i]).toFixed(1) + '" y="' + y0.toFixed(1) +
         '" width="' + bw.toFixed(1) + '" height="' + Math.max(0.5, y1 - y0).toFixed(1) +
         '" fill="' + colours[a] + '" opacity=".92"/>';
       base += v;
@@ -274,21 +292,28 @@ function draw() {
     let d = "", pen = false;
     prices.forEach((p, i) => {
       if (!p) { pen = false; return; }
-      d += (pen ? "L" : "M") + cx(i).toFixed(1) + "," + yp(p).toFixed(1) + " ";
+      d += (pen ? "L" : "M") + (xt(ms[i]) + bw / 2).toFixed(1) + "," + yp(p).toFixed(1) + " ";
       pen = true;
     });
     svg += '<path d="' + d + '" fill="none" stroke="var(--price)" stroke-width="2"' +
       ' stroke-linejoin="round" stroke-linecap="round"/>';
   }
 
-  const ticks = Math.min(7, n);
+  // Ticks land on round clock hours across the window, so spacing reflects
+  // elapsed time. Step widens as the window grows to avoid crowding.
+  const hoursSpan = span / HOUR;
+  const step = hoursSpan <= 8 ? 1 : hoursSpan <= 30 ? 3 : hoursSpan <= 80 ? 6 :
+               hoursSpan <= 200 ? 24 : 48;
   let lastDay = "";
-  for (let t = 0; t < ticks; t++) {
-    const i = Math.round((t / Math.max(1, ticks - 1)) * (n - 1));
-    const d = dayLabel(snaps[i].t);
-    const txt = d === lastDay ? hourLabel(snaps[i].t) : d + " " + hourLabel(snaps[i].t);
+  const firstTick = Math.ceil(t0 / (step * HOUR)) * step * HOUR;
+  for (let t = firstTick; t <= t1; t += step * HOUR) {
+    const x = xt(t);
+    if (x < L - 1 || x > W - R + 1) continue;
+    const iso = new Date(t).toISOString();
+    const d = dayLabel(iso);
+    const txt = d === lastDay ? hourLabel(iso) : d + " " + hourLabel(iso);
     lastDay = d;
-    svg += '<text class="axis" x="' + cx(i).toFixed(1) + '" y="' + (H - 11) +
+    svg += '<text class="axis" x="' + x.toFixed(1) + '" y="' + (H - 11) +
       '" text-anchor="middle">' + txt + '</text>';
   }
 
@@ -298,7 +323,7 @@ function draw() {
     '" fill="transparent"/></svg>';
 
   document.getElementById("plot").innerHTML = svg + '<div class="tip" id="tip"></div>';
-  wireHover(snaps, shown, { W: W, L: L, T: T, ih: ih, band: band, cx: cx, ref: ref });
+  wireHover(snaps, shown, { W: W, L: L, T: T, ih: ih, ms: ms, xt: xt, bw: bw, ref: ref });
 }
 
 function wireHover(snaps, shown, geo) {
@@ -312,13 +337,18 @@ function wireHover(snaps, shown, geo) {
     const box = svg.getBoundingClientRect();
     const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
     const px = (clientX - box.left) / box.width * geo.W;
-    let i = Math.floor((px - geo.L) / geo.band);
-    i = Math.max(0, Math.min(snaps.length - 1, i));
+    // Pick the bar whose drawn position is closest to the cursor.
+    let i = 0, best = Infinity;
+    for (let k = 0; k < geo.ms.length; k++) {
+      const d = Math.abs(geo.xt(geo.ms[k]) + geo.bw / 2 - px);
+      if (d < best) { best = d; i = k; }
+    }
     const s = snaps[i];
+    const gx = geo.xt(geo.ms[i]) + geo.bw / 2;
 
     guide.style.display = "";
-    guide.setAttribute("x1", geo.cx(i));
-    guide.setAttribute("x2", geo.cx(i));
+    guide.setAttribute("x1", gx);
+    guide.setAttribute("x2", gx);
 
     const rows = shown.map(a => ({ a: a, v: vol(s.pools[a]) }))
       .filter(r => r.v > 0)
@@ -334,7 +364,7 @@ function wireHover(snaps, shown, geo) {
         price.toFixed(5) + "</b></div>" : "");
 
     tip.classList.add("on");
-    const rel = (geo.cx(i) / geo.W) * plot.clientWidth;
+    const rel = (gx / geo.W) * plot.clientWidth;
     const w = tip.offsetWidth;
     tip.style.left = Math.max(0, Math.min(plot.clientWidth - w, rel - w / 2)) + "px";
     tip.style.top = "8px";
@@ -421,7 +451,8 @@ function render(h) {
     '<button data-h="24" aria-pressed="true">24H</button>' +
     '<button data-h="72" aria-pressed="false">3D</button>' +
     '<button data-h="168" aria-pressed="false">7D</button>' +
-    '<button data-h="0" aria-pressed="false">All</button></div></div>' +
+    '<button data-h="0" aria-pressed="false">All</button>' +
+    '<button id="logbtn" aria-pressed="false" style="margin-left:8px">Log</button></div></div>' +
     '<div class="plot" id="plot"></div>' +
     (dropped ? '<p class="note">' + dropped + " implausible reading" + (dropped > 1 ? "s" : "") +
       " from the data feed excluded (1h volume exceeded the pool's own 24h volume).</p>" : "") +
@@ -433,8 +464,15 @@ function render(h) {
   document.getElementById("ranges").addEventListener("click", function (e) {
     const b = e.target.closest("button"); if (!b) return;
     STATE.hours = +b.dataset.h;
-    Array.prototype.forEach.call(e.currentTarget.children,
-      c => c.setAttribute("aria-pressed", c === b));
+    Array.prototype.forEach.call(e.currentTarget.children, function (c) {
+      if (c.id !== "logbtn") c.setAttribute("aria-pressed", c === b);
+    });
+    draw();
+  });
+
+  document.getElementById("logbtn").addEventListener("click", function (e) {
+    STATE.log = !STATE.log;
+    e.currentTarget.setAttribute("aria-pressed", STATE.log);
     draw();
   });
 
