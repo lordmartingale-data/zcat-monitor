@@ -2,12 +2,13 @@ name: Collect pool volume
 
 on:
   schedule:
-    # Hourly, at 17 past. Off-the-hour times are less congested on GitHub's
-    # shared scheduler, so runs are less likely to be delayed or dropped.
-    - cron: "17 * * * *"
+    # Every 20 minutes. GitHub drops a large share of scheduled runs on shared
+    # runners, so one attempt per hour loses hours. The script keeps only the
+    # first success in each hour, so the extra runs are cheap insurance and
+    # produce no extra commits.
+    - cron: "7,27,47 * * * *"
   workflow_dispatch:
 
-# Prevent two runs writing history.json at once.
 concurrency:
   group: collect
   cancel-in-progress: false
@@ -26,6 +27,9 @@ jobs:
           python-version: "3.12"
 
       - name: Fetch snapshot
+        # A manual run always refreshes the current hour; scheduled runs don't.
+        env:
+          FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: python scripts/collect.py
 
       - name: Commit if changed
