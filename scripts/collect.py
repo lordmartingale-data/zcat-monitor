@@ -66,6 +66,15 @@ def main():
     stamp = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     stamp_iso = stamp.isoformat().replace("+00:00", "Z")
 
+    # The collector runs several times an hour so a dropped GitHub run doesn't
+    # cost a data point. The first success in an hour is kept and later
+    # attempts do nothing, which keeps every reading's 1h window at a
+    # consistent offset instead of wandering with retry timing.
+    force = os.environ.get("FORCE_REFRESH") == "1"
+    if not force and any(s.get("t") == stamp_iso for s in snapshots):
+        print(f"{stamp_iso}: already captured this hour, nothing to do.")
+        return 0
+
     reading = {}
     for pair in pairs:
         # The mint is Solana-native, but guard anyway so an unrelated
@@ -82,12 +91,11 @@ def main():
         liquidity = num((pair.get("liquidity") or {}).get("usd"))
         price = num(pair.get("priceUsd"))
 
-        # DexScreener sometimes returns a corrupt h1 figure (observed on
-        # Meteora DLMM pools) that is larger than the pool's own 24h volume.
-        # The hour sits inside the day, so that is impossible by definition;
-        # drop the reading rather than let one bad point wreck the chart.
-        if vol_1h > vol_24h * 1.02 and vol_24h > 0:
-            print(f"  dropped implausible 1h reading for {addr}: "
+        # An hour sits inside its own day, so a 1h figure above the 24h
+        # figure can only be a feed error. Large-but-consistent spikes are
+        # left alone: violent hours are real and are the point of this chart.
+        if vol_24h > 0 and vol_1h > vol_24h * 1.05:
+            print(f"  dropped impossible 1h reading for {addr}: "
                   f"{vol_1h:,.0f} > 24h {vol_24h:,.0f}", file=sys.stderr)
             vol_1h = -1.0
 
