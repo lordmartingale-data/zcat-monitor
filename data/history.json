@@ -51,6 +51,16 @@
    "quote": "SOL",
    "url": "https://dexscreener.com/solana/gupbekwp9mqb23cghhimqztaigpdujooovo1necerhm8"
   },
+  "HXMUEuh1h9NvZodH9yRVwv2PRegC9w3kw8biM9pxFzXH": {
+   "base": "TACZ",
+   "dex": "raydium",
+   "firstSeen": "2026-09-12T18:00:00Z",
+   "labels": [
+    "CPMM"
+   ],
+   "quote": "ZCAT",
+   "url": "https://dexscreener.com/solana/hxmueuh1h9nvzodh9yrvwv2pregc9w3kw8bim9pxfzxh"
+  },
   "J6nHiirmZrDS6XRH6uWXHiNYeKyT5zMfkjHXa4GC4vAj": {
    "base": "ZCAT",
    "dex": "meteora",
@@ -1335,8 +1345,61 @@
     }
    },
    "t": "2026-09-12T16:00:00Z"
+  },
+  {
+   "pools": {
+    "7t477j7S8SDcdg1pzCSvjRjYK3nPc14FmrbzPYTjfHYs": {
+     "liq": 414906.12,
+     "px": 0.09994,
+     "v1": 33664.09,
+     "v24": 912980.0
+    },
+    "BTccxxTFi7a9xJTE1exKn38Jgie35s6gNeRxd8DM61Rc": {
+     "liq": 1582460.23,
+     "px": 0.1049,
+     "v1": 294565.06,
+     "v24": 4225763.71
+    },
+    "CZt61djgJ6ggjA1aCfYskFViBQxcprA9HT3nE7PZdE1X": {
+     "liq": 75155.92,
+     "px": 0.1048,
+     "v1": 133675.24,
+     "v24": 946077.73
+    },
+    "GVJ3uPdWMQto2NeC3KPcxGGZAUDGgxTWYQ519b7YKAyy": {
+     "liq": 3213.0,
+     "px": 0.1004,
+     "v1": 539.54,
+     "v24": 13566.0
+    },
+    "GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8": {
+     "liq": 1114350.46,
+     "px": 0.101,
+     "v1": 308800.42,
+     "v24": 5280060.86
+    },
+    "HXMUEuh1h9NvZodH9yRVwv2PRegC9w3kw8biM9pxFzXH": {
+     "liq": 151568.59,
+     "px": 0.002663,
+     "v1": 46843.65,
+     "v24": 983488.04
+    },
+    "J6nHiirmZrDS6XRH6uWXHiNYeKyT5zMfkjHXa4GC4vAj": {
+     "liq": 47572.59,
+     "px": 0.1055,
+     "v1": 24651.16,
+     "v24": 374530.89
+    },
+    "z29j7kXfR66dj2d3FT4yxiQHg7EULzjsoh2Hc2DgNak": {
+     "liq": 1957.79,
+     "px": 0.1047,
+     "v1": 2293.25,
+     "v24": 11624.83
+    }
+   },
+   "t": "2026-09-12T18:00:00Z"
   }
  ],
  "threshold": 900000,
- "updated": "2026-09-12T16:00:00Z"
+ "updated": "2026-09-12T18:00:00Z"
 }
