@@ -3362,8 +3362,55 @@
     }
    },
    "t": "2026-09-18T23:00:00Z"
+  },
+  {
+   "pools": {
+    "7t477j7S8SDcdg1pzCSvjRjYK3nPc14FmrbzPYTjfHYs": {
+     "liq": 172386.96,
+     "px": 0.1221,
+     "v1": 3777.23,
+     "v24": 137735.72
+    },
+    "BTccxxTFi7a9xJTE1exKn38Jgie35s6gNeRxd8DM61Rc": {
+     "liq": 1955375.03,
+     "px": 0.121,
+     "v1": 14746.37,
+     "v24": 980018.26
+    },
+    "CZt61djgJ6ggjA1aCfYskFViBQxcprA9HT3nE7PZdE1X": {
+     "liq": 275363.32,
+     "px": 0.1197,
+     "v1": 63605.54,
+     "v24": 2558413.95
+    },
+    "GVJ3uPdWMQto2NeC3KPcxGGZAUDGgxTWYQ519b7YKAyy": {
+     "liq": 7379.01,
+     "px": 0.1221,
+     "v1": 329.89,
+     "v24": 6750.97
+    },
+    "GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8": {
+     "liq": 1695149.52,
+     "px": 0.1161,
+     "v1": 69373.82,
+     "v24": 4632539.95
+    },
+    "J6nHiirmZrDS6XRH6uWXHiNYeKyT5zMfkjHXa4GC4vAj": {
+     "liq": 115234.52,
+     "px": 0.1168,
+     "v1": 8612.48,
+     "v24": 398555.94
+    },
+    "z29j7kXfR66dj2d3FT4yxiQHg7EULzjsoh2Hc2DgNak": {
+     "liq": 10214.25,
+     "px": 0.1203,
+     "v1": 1097.53,
+     "v24": 55112.0
+    }
+   },
+   "t": "2026-09-19T01:00:00Z"
   }
  ],
  "threshold": 900000,
- "updated": "2026-09-18T23:00:00Z"
+ "updated": "2026-09-19T01:00:00Z"
 }
